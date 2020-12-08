@@ -67,3 +67,8 @@ section#post-list article footer p span {
     color: #7159c1;
     display: block;
 }
+
+#btn_more {
+  border: none;
+  background: transparent;
+}

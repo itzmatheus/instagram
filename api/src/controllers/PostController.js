@@ -16,16 +16,16 @@ module.exports = {
     },
 
     async store(req, res) {
-        
+
         const { author, place, description, hashtags } = req.body;
         let fileName = "";
 
         if (req.file){
 
-            const { filename: image, key: key, location: url = "" } = req.file;  
+            const { filename: image, key: key, location: url = "" } = req.file;
             fileName = url;
 
-            if ( (process.env.STORAGE_TYPE === 'local') && req.file) { 
+            if ( (process.env.STORAGE_TYPE === 'local') && req.file) {
 
                 const [name] = image.split('.');
 
@@ -35,9 +35,9 @@ module.exports = {
                 .resize(500)
                 .jpeg({ quality: 70 })
                 .toFile(
-                    path.resolve(req.file.destination, 'resized', name + '.jpg') 
+                    path.resolve(req.file.destination, 'resized', name + '.jpg')
                 );
-        
+
                 fs.unlinkSync(req.file.path);
 
             }
@@ -45,13 +45,13 @@ module.exports = {
 
         const post = await Post.create({
             author,
-            place, 
+            place,
             description,
             hashtags,
             image: fileName,
-        }); 
+        });
 
-        req.io.emit('post', post);
+        req.io.emit('post_create', post);
 
         return res.json(post);
     },
@@ -60,6 +60,9 @@ module.exports = {
 
         const post = await Post.findById(req.params.id);
         await post.remove();
+
+        req.io.emit('post_delete', post);
+
         return res.json({
             mensagem: "Postagem deletada com sucesso",
         });
